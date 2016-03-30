@@ -11,56 +11,58 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+
+import Datanode.source.DataNode;
+import Proto.Hdfs;
 	
 public class NameNode implements INameNode {
 	
 	public byte[] openFile(byte[] inp) throws RemoteException
 	{
-		byte[] a;
-		a = new byte[10];
-		return a;
+		return null;
 	}
 
 	public byte[] closeFile(byte[] inp) throws RemoteException
 	{
-		byte[] a;
-		a = new byte[10];
-		return a;
+		return null;
 	}
 
 	public byte[] getBlockLocations(byte[] inp ) throws RemoteException
 	{
-		byte[] a;
-		a = new byte[10];
-		return a;
+		return null;
 	}
 
 	public byte[] assignBlock(byte[] inp ) throws RemoteException
 	{
-		byte[] a;
-		a = new byte[10];
-		return a;
+		return null;
 	}
 
 	public byte[] list(byte[] inp ) throws RemoteException
 	{
-		byte[] a;
-		a = new byte[10];
-		return a;
+		return null;
 	}
 
 	public byte[] blockReport(byte[] inp ) throws RemoteException
 	{
-		byte[] a;
-		a = new byte[10];
-		return a;
+		return null;
 	}
 
 	public byte[] heartBeat(byte[] inp ) throws RemoteException
 	{
-		byte[] a;
-		a = new byte[10];
-		return a;
+		try
+		{
+			Hdfs.HeartBeatRequest req = Hdfs.HeartBeatRequest.parseFrom(inp);
+			int id = req.getId();
+			System.err.println("HeartBeat received from DN : " + String.valueOf(id));
+
+			Hdfs.HeartBeatResponse.Builder hbr_builder = Hdfs.HeartBeatResponse.newBuilder().setStatus(1);
+			return hbr_builder.build().toByteArray();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public static void main(String args[])

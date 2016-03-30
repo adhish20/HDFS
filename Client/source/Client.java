@@ -12,13 +12,19 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import Namenode.source.NameNode;
+import Namenode.source.INameNode;
+import Datanode.source.DataNode;
+import Datanode.source.IDataNode;
+
 public class Client
 {
 	public static void main(String args[])
 	{
 		try
-		{  
-			INameNode stub=(INameNode)Naming.lookup();  
+		{
+			Registry registry = LocateRegistry.getRegistry();
+			INameNode stub=(INameNode)registry.lookup("NameNode");  
 		}
 		catch (Exception e)
 		{

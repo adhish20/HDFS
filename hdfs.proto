@@ -1,3 +1,4 @@
+package Proto;
 message OpenFileRequest {
   optional string fileName = 1; // fileName
   optional bool forRead = 2; // true, for read; false for write
