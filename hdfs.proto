@@ -21,6 +21,7 @@ message CloseFileResponse {
 
 message WriteBlockRequest {
   optional BlockLocations blockInfo = 1;
+  optional bytes data = 2;
 }
 
 message WriteBlockResponse {
@@ -43,7 +44,7 @@ message BlockLocationRequest {
 
 message BlockLocationResponse {
   optional int32 status = 1;
-  repeated BlockLocations blockLocations = 2;
+  optional BlockLocations blockLocations = 2;
 }
 
 message AssignBlockRequest {
