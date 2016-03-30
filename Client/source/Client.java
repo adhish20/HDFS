@@ -82,6 +82,9 @@ public class Client
 								Hdfs.WriteBlockResponse writeBlockResponse = Hdfs.WriteBlockResponse.parseFrom(writeBlockResponseBytes);
 							}
 						}
+						Hdfs.CloseFileRequest.Builder closeFileRequestBuilder = Hdfs.CloseFileRequest.newBuilder();
+						closeFileRequestBuilder.setHandle(openFileResponse.getHandle());
+						stub.closeFile(closeFileRequestBuilder.build().toByteArray());
 					}
 				}
 				else if (command.equals(LIST))

@@ -16,8 +16,8 @@ import com.google.protobuf.ByteString;
 public class NameNode implements INameNode {
 
 	private HashMap<Integer, String> handle_filename_map;
-	private HashMap<String, ArrayList<Integer>> filename_block_map;
-	private HashMap<Integer, ArrayList<Integer>> block_datanode_map;
+	private static HashMap<String, ArrayList<Integer>> filename_block_map;
+	private static HashMap<Integer, ArrayList<Integer>> block_datanode_map;
 	public int blockNum, fileNum;
 	private static int dataNodeNum = 3;
 	private static String[] dataNodeIPs = {"57.174.162.89","57.174.162.89","57.174.162.89"};
@@ -61,6 +61,34 @@ public class NameNode implements INameNode {
 
 	public byte[] closeFile(byte[] inp) throws RemoteException
 	{
+		try
+		{
+			Hdfs.CloseFileRequest closeFileRequest = Hdfs.CloseFileRequest.parseFrom(inp);
+			int handle = closeFileRequest.getHandle();
+
+
+			File report = new File("fileList.txt");
+
+			FileWriter fw = new FileWriter(report.getName(), true);
+
+			BufferedWriter bw = new BufferedWriter(fw);
+
+			String filename = (String) handle_filename_map.get(handle);
+			ArrayList<Integer> blockList = filename_block_map.get(filename);
+
+			bw.write(filename+" ");
+			for(int i : blockList)
+			{
+				bw.write(Integer.toString(i)+" ");
+			}
+			bw.newLine();
+
+			bw.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		return null;
 	}
 
@@ -188,6 +216,7 @@ public class NameNode implements INameNode {
 
 	public static void main(String args[])
 	{
+		File report = new File("fileList.txt");
 		try
 		{
 			NameNode obj = new NameNode();
@@ -199,6 +228,27 @@ public class NameNode implements INameNode {
 		catch (Exception e)
 		{
 			System.err.println("Server exception: " + e.toString());
+			e.printStackTrace();
+		}
+		try
+		{
+			BufferedReader br = new BufferedReader(new FileReader(report));
+			String line, filename;
+			filename = "";
+			while ((line = br.readLine()) != null)
+			{
+				int blockNumber;
+
+				String[] fileBlocks = line.split(" ");
+				filename = fileBlocks[0];
+				ArrayList<Integer> blocks = new ArrayList<Integer>();
+				for(int i=1;i<fileBlocks.length;i++)
+					blocks.add(Integer.parseInt(fileBlocks[i]));
+				filename_block_map.put(filename, blocks);
+			}
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 	}
