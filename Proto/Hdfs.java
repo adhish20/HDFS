@@ -2232,13 +2232,17 @@ public final class Hdfs {
     Proto.Hdfs.BlockLocationsOrBuilder getBlockInfoOrBuilder();
 
     /**
-     * <code>optional bytes data = 2;</code>
+     * <code>repeated bytes data = 2;</code>
      */
-    boolean hasData();
+    java.util.List<com.google.protobuf.ByteString> getDataList();
     /**
-     * <code>optional bytes data = 2;</code>
+     * <code>repeated bytes data = 2;</code>
      */
-    com.google.protobuf.ByteString getData();
+    int getDataCount();
+    /**
+     * <code>repeated bytes data = 2;</code>
+     */
+    com.google.protobuf.ByteString getData(int index);
   }
   /**
    * Protobuf type {@code Proto.WriteBlockRequest}
@@ -2306,8 +2310,11 @@ public final class Hdfs {
               break;
             }
             case 18: {
-              bitField0_ |= 0x00000002;
-              data_ = input.readBytes();
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                data_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              data_.add(input.readBytes());
               break;
             }
           }
@@ -2318,6 +2325,9 @@ public final class Hdfs {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          data_ = java.util.Collections.unmodifiableList(data_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -2372,23 +2382,30 @@ public final class Hdfs {
     }
 
     public static final int DATA_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString data_;
+    private java.util.List<com.google.protobuf.ByteString> data_;
     /**
-     * <code>optional bytes data = 2;</code>
+     * <code>repeated bytes data = 2;</code>
      */
-    public boolean hasData() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+    public java.util.List<com.google.protobuf.ByteString>
+        getDataList() {
+      return data_;
     }
     /**
-     * <code>optional bytes data = 2;</code>
+     * <code>repeated bytes data = 2;</code>
      */
-    public com.google.protobuf.ByteString getData() {
-      return data_;
+    public int getDataCount() {
+      return data_.size();
+    }
+    /**
+     * <code>repeated bytes data = 2;</code>
+     */
+    public com.google.protobuf.ByteString getData(int index) {
+      return data_.get(index);
     }
 
     private void initFields() {
       blockInfo_ = Proto.Hdfs.BlockLocations.getDefaultInstance();
-      data_ = com.google.protobuf.ByteString.EMPTY;
+      data_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -2406,8 +2423,8 @@ public final class Hdfs {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeMessage(1, blockInfo_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, data_);
+      for (int i = 0; i < data_.size(); i++) {
+        output.writeBytes(2, data_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -2422,9 +2439,14 @@ public final class Hdfs {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, blockInfo_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, data_);
+      {
+        int dataSize = 0;
+        for (int i = 0; i < data_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(data_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getDataList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2550,7 +2572,7 @@ public final class Hdfs {
           blockInfoBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000001);
-        data_ = com.google.protobuf.ByteString.EMPTY;
+        data_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
@@ -2588,8 +2610,9 @@ public final class Hdfs {
         } else {
           result.blockInfo_ = blockInfoBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          data_ = java.util.Collections.unmodifiableList(data_);
+          bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.data_ = data_;
         result.bitField0_ = to_bitField0_;
@@ -2611,8 +2634,15 @@ public final class Hdfs {
         if (other.hasBlockInfo()) {
           mergeBlockInfo(other.getBlockInfo());
         }
-        if (other.hasData()) {
-          setData(other.getData());
+        if (!other.data_.isEmpty()) {
+          if (data_.isEmpty()) {
+            data_ = other.data_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensureDataIsMutable();
+            data_.addAll(other.data_);
+          }
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -2757,37 +2787,74 @@ public final class Hdfs {
         return blockInfoBuilder_;
       }
 
-      private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
-      /**
-       * <code>optional bytes data = 2;</code>
-       */
-      public boolean hasData() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+      private java.util.List<com.google.protobuf.ByteString> data_ = java.util.Collections.emptyList();
+      private void ensureDataIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          data_ = new java.util.ArrayList<com.google.protobuf.ByteString>(data_);
+          bitField0_ |= 0x00000002;
+         }
       }
       /**
-       * <code>optional bytes data = 2;</code>
+       * <code>repeated bytes data = 2;</code>
        */
-      public com.google.protobuf.ByteString getData() {
-        return data_;
+      public java.util.List<com.google.protobuf.ByteString>
+          getDataList() {
+        return java.util.Collections.unmodifiableList(data_);
       }
       /**
-       * <code>optional bytes data = 2;</code>
+       * <code>repeated bytes data = 2;</code>
        */
-      public Builder setData(com.google.protobuf.ByteString value) {
+      public int getDataCount() {
+        return data_.size();
+      }
+      /**
+       * <code>repeated bytes data = 2;</code>
+       */
+      public com.google.protobuf.ByteString getData(int index) {
+        return data_.get(index);
+      }
+      /**
+       * <code>repeated bytes data = 2;</code>
+       */
+      public Builder setData(
+          int index, com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
-        data_ = value;
+  ensureDataIsMutable();
+        data_.set(index, value);
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes data = 2;</code>
+       * <code>repeated bytes data = 2;</code>
+       */
+      public Builder addData(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureDataIsMutable();
+        data_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes data = 2;</code>
+       */
+      public Builder addAllData(
+          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensureDataIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, data_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes data = 2;</code>
        */
       public Builder clearData() {
+        data_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000002);
-        data_ = getDefaultInstance().getData();
         onChanged();
         return this;
       }
@@ -10783,7 +10850,7 @@ public final class Hdfs {
       "uest\022\016\n\006handle\030\001 \001(\005\"#\n\021CloseFileRespons" +
       "e\022\016\n\006status\030\001 \001(\005\"K\n\021WriteBlockRequest\022(" +
       "\n\tblockInfo\030\001 \001(\0132\025.Proto.BlockLocations" +
-      "\022\014\n\004data\030\002 \001(\014\"$\n\022WriteBlockResponse\022\016\n\006" +
+      "\022\014\n\004data\030\002 \003(\014\"$\n\022WriteBlockResponse\022\016\n\006" +
       "status\030\001 \001(\005\",\n\020DataNodeLocation\022\n\n\002ip\030\001" +
       " \001(\t\022\014\n\004port\030\002 \001(\005\"Q\n\016BlockLocations\022\023\n\013",
       "blockNumber\030\001 \001(\005\022*\n\tlocations\030\002 \003(\0132\027.P" +

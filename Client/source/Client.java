@@ -7,13 +7,14 @@ import java.rmi.server.UnicastRemoteObject;
 
 import java.lang.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
 
 import Namenode.source.INameNode;
 import Datanode.source.IDataNode;
+
+import Proto.Hdfs;
+import com.google.protobuf.ByteString;
 
 public class Client
 {

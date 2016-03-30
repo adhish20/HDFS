@@ -11,12 +11,13 @@ import java.io.*;
 
 import Namenode.source.INameNode;
 import Proto.Hdfs;
+import com.google.protobuf.ByteString;
 	
 public class DataNode implements IDataNode {
 
-	private static String NameNode_IP = "54.174.209.93"
+	private static String NameNode_IP = "54.174.209.93";
 	private int ID;
-	private static final int block_size = 32*1024*1024;
+	private static final int block_size = 33554432;
 
 	public DataNode(int id)
 	{
@@ -25,7 +26,7 @@ public class DataNode implements IDataNode {
 
 	public byte[] readBlock(byte[] inp) throws RemoteException
 	{
-		return NULL;
+		return null;
 	}
 
 	public byte[] writeBlock(byte[] inp) throws RemoteException
@@ -65,7 +66,11 @@ public class DataNode implements IDataNode {
 
 	static class HeartBeat extends Thread
 	{
-		public HeartBeat(){}
+		private int ID;
+		public HeartBeat(int id)
+		{
+			ID = id;
+		}
 
 		public void run()
 		{
@@ -93,13 +98,13 @@ public class DataNode implements IDataNode {
 	{
 		try
 		{
-			DataNode obj = new DataNode(args[0]);
+			DataNode obj = new DataNode(Integer.parseInt(args[0]));
 			IDataNode stub = (IDataNode) UnicastRemoteObject.exportObject(obj, 0);
 			
 			Registry registry = LocateRegistry.getRegistry();
 			registry.bind("DataNode", stub);
 
-			HeartBeat heartBeat = new HeartBeat();
+			HeartBeat heartBeat = new HeartBeat(obj.ID);
 			heartBeat.start();
 
 
