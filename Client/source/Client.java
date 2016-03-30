@@ -86,6 +86,19 @@ public class Client
 				else if (command.equals(LIST))
 				{
 					System.err.println(LIST);
+					try
+					{
+						Registry NN_Registry = LocateRegistry.getRegistry(NameNode_IP,1099);
+						INameNode stub1 = (INameNode) NN_Registry.lookup("NameNode");
+						byte[] res = stub1.list(null);
+						Hdfs.ListFilesResponse resp = Hdfs.ListFilesResponse.parseFrom(res);
+						for(String filename : resp.getFileNamesList())
+							System.err.println(filename);
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
 				}
 				else
 				{

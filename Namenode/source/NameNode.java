@@ -122,6 +122,19 @@ public class NameNode implements INameNode {
 
 	public byte[] list(byte[] inp ) throws RemoteException
 	{
+		try
+		{
+			Hdfs.ListFilesResponse.Builder listResponse = Hdfs.ListFilesResponse.newBuilder().setStatus(1);
+			for(String fileName : filename_block_map.keySet())
+			{
+				listResponse.addFileNames(fileName);
+			}
+			return listResponse.build().toByteArray();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		return null;
 	}
 
