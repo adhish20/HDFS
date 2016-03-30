@@ -94,6 +94,61 @@ public class DataNode implements IDataNode {
 		}
 	}
 
+	static class BlockReport extends Thread
+	{
+		private int ID;
+		public BlockReport(int id)
+		{
+			ID = id;
+		}
+
+		public void run()
+		{
+			while(true)
+			{
+				File blk_rpt = new File("BlockReport.txt");
+				String data = "";
+				if (blk_rpt.exists() && blk_rpt.length()!=0)
+				{
+					try{
+						BufferedReader br = new BufferedReader(new FileReader(blk_rpt));
+						String blk_num;
+						Hdfs.BlockReportRequest.Builder blk_rpt_req_builder = Hdfs.BlockReportRequest.newBuilder().setId(this.ID);
+						while((blk_num = br.readLine())!=null)
+						{
+							blk_rpt_req_builder.addBlockNumbers(Integer.parseInt(blk_num));
+						}
+						br.close();
+
+						Registry registry = LocateRegistry.getRegistry(NameNode_IP,1099);
+						INameNode stub = (INameNode) registry.lookup("NameNode");
+						byte[] blockReportResponse = stub.blockReport(blk_rpt_req_builder.build().toByteArray());
+
+						Hdfs.BlockReportResponse res = Hdfs.BlockReportResponse.parseFrom(blockReportResponse);
+						System.err.println("Block Report Response from NameNode " + String.valueOf(res.getStatusCount()));
+						Thread.sleep(10000);
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
+				else
+				{
+					System.err.println("No block report");
+					try
+					{
+						Thread.sleep(10000);
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+
 	public static void main(String args[])
 	{
 		try
@@ -107,7 +162,8 @@ public class DataNode implements IDataNode {
 			HeartBeat heartBeat = new HeartBeat(obj.ID);
 			heartBeat.start();
 
-
+			BlockReport report = new BlockReport(obj.ID);
+			report.start();
 		}
 		catch (Exception e)
 		{

@@ -139,6 +139,32 @@ public class NameNode implements INameNode {
 
 	public byte[] blockReport(byte[] inp ) throws RemoteException
 	{
+		try
+		{
+			Hdfs.BlockReportRequest req = Hdfs.BlockReportRequest.parseFrom(inp);
+			int datanode_id = req.getId();
+			int num_blks = req.getBlockNumbersCount();
+
+			for(int i=0;i<num_blks;i++)
+			{
+				if(block_datanode_map.get(req.getBlockNumbers(i)) == null)
+				{
+					block_datanode_map.put(req.getBlockNumbers(i), new ArrayList<Integer>(Arrays.asList(datanode_id)));
+				}
+				else
+				{
+					if (!block_datanode_map.get(req.getBlockNumbers(i)).contains(datanode_id))
+						block_datanode_map.get(req.getBlockNumbers(i)).add(datanode_id);
+				}
+			}
+
+			Hdfs.BlockReportResponse.Builder brr_builder = Hdfs.BlockReportResponse.newBuilder().setStatus(0,1);
+			return brr_builder.build().toByteArray();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		return null;
 	}
 
