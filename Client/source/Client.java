@@ -40,6 +40,45 @@ public class Client
 				{
 					String fileName = scanner.next();
 					System.err.println(fileName);
+
+					Hdfs.OpenFileRequest.Builder openFileRequestBuilder = Hdfs.OpenFileRequest.newBuilder();
+					openFileRequestBuilder.setFileName(fileName);
+					openFileRequestBuilder.setForRead(true);
+					byte[] openFileRequestBytes = openFileRequestBuilder.build().toByteArray();
+					byte[] openFileResponseBytes = stub.openFile(openFileRequestBytes);
+					
+					if(openFileResponseBytes != null)
+					{
+						Hdfs.OpenFileResponse ofr = Hdfs.OpenFileResponse.parseFrom(openFileResponseBytes);
+						int handle = ofr.getHandle();
+						int blk_count = ofr.getBlockNumsCount();
+
+						File file = new File(fileName);
+						FileOutputStream fs = new FileOutputStream(file);
+
+						for(int i=0;i<blk_count;i++)
+						{
+							Hdfs.BlockLocationRequest.Builder blr_builder = Hdfs.BlockLocationRequest.newBuilder().setBlockNum(ofr.getBlockNums(i));
+							byte[] res = stub.getBlockLocations(blr_builder.build().toByteArray());
+
+							Hdfs.BlockLocationResponse blr = Hdfs.BlockLocationResponse.parseFrom(res);
+							if(blr.getStatus() == 1)
+							{
+								Hdfs.BlockLocations bl = blr.getBlockLocations();
+								String DN_IP = bl.getLocations(0).getIp();
+								Registry reg = LocateRegistry.getRegistry(DN_IP,1099);
+								IDataNode stub1 = (IDataNode) reg.lookup("DataNode");
+
+								Hdfs.ReadBlockRequest.Builder rbr_builder = Hdfs.ReadBlockRequest.newBuilder().setBlockNumber(ofr.getBlockNums(i));
+								byte[] resp = stub1.readBlock(rbr_builder.build().toByteArray());
+
+								Hdfs.ReadBlockResponse rbr = Hdfs.ReadBlockResponse.parseFrom(resp);
+								ByteString data = rbr.getData(0);
+								fs.write(data.toByteArray());
+							}
+						}
+						fs.close();
+					}
 				}
 
 				else if (command.equals(PUT))

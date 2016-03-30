@@ -39,7 +39,7 @@ message BlockLocations {
 }
 
 message BlockLocationRequest {
-  repeated int32 blockNums = 1;
+  optional int32 blockNum = 1;
 }
 
 message BlockLocationResponse {

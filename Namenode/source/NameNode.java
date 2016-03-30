@@ -94,6 +94,25 @@ public class NameNode implements INameNode {
 
 	public byte[] getBlockLocations(byte[] inp ) throws RemoteException
 	{
+		try
+		{
+			Hdfs.BlockLocationRequest blr = Hdfs.BlockLocationRequest.parseFrom(inp);
+			int block_number = blr.getBlockNum();
+
+			Hdfs.BlockLocationResponse.Builder blr_builder = Hdfs.BlockLocationResponse.newBuilder().setStatus(1);
+			Hdfs.BlockLocations.Builder bl_builder = Hdfs.BlockLocations.newBuilder().setBlockNumber(block_number);
+			for (int node : block_datanode_map.get(block_number))
+			{
+				Hdfs.DataNodeLocation.Builder dnl_builder = Hdfs.DataNodeLocation.newBuilder().setIp(dataNodeIPs[node]).setPort(dataNodePorts[node]);
+				bl_builder.addLocations(dnl_builder.build());
+			}
+			blr_builder.setBlockLocations(bl_builder.build());
+			return blr_builder.build().toByteArray();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		return null;
 	}
 

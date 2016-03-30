@@ -26,7 +26,27 @@ public class DataNode implements IDataNode {
 
 	public byte[] readBlock(byte[] inp) throws RemoteException
 	{
-		return null;
+		File dir = new File("Blocks");
+		Hdfs.ReadBlockResponse.Builder rbr_builder = Hdfs.ReadBlockResponse.newBuilder().setStatus(1);
+		try
+		{
+			int blk_num = Hdfs.ReadBlockRequest.parseFrom(inp).getBlockNumber();
+			File block = new File(dir, String.valueOf(blk_num));
+			FileInputStream fis = new FileInputStream(block);
+			byte[] blk = new byte[block_size];
+			int bytes;
+
+			while((bytes = fis.read(blk)) != -1)
+			{
+				ByteString data = ByteString.copyFrom(blk);
+				rbr_builder.addData(data);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return rbr_builder.build().toByteArray();
 	}
 
 	public byte[] writeBlock(byte[] inp) throws RemoteException
@@ -153,6 +173,10 @@ public class DataNode implements IDataNode {
 	{
 		try
 		{
+			File blocks = new File("Blocks");
+			if(!blocks.exists())
+				blocks.mkdirs();
+
 			DataNode obj = new DataNode(Integer.parseInt(args[0]));
 			IDataNode stub = (IDataNode) UnicastRemoteObject.exportObject(obj, 0);
 			
