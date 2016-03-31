@@ -20,7 +20,7 @@ public class NameNode implements INameNode {
 	private static HashMap<Integer, ArrayList<Integer>> block_datanode_map;
 	public int blockNum, fileNum;
 	private static int dataNodeNum = 3;
-	private static String[] dataNodeIPs = {"57.174.162.89","57.174.162.89","57.174.162.89"};
+	private static String[] dataNodeIPs = {"54.174.162.89","54.174.129.146","54.88.112.53"};
 	private static int[] dataNodePorts = {1099,1099,1099};
 
 	public NameNode()
@@ -134,9 +134,10 @@ public class NameNode implements INameNode {
 			Hdfs.DataNodeLocation.Builder dataNodeLocationBuilder = Hdfs.DataNodeLocation.newBuilder();
 
 			int datanode1, datanode2;
-			datanode1 = new Random().nextInt(dataNodeNum);
+			Random r = new Random();
+			datanode1 = r.nextInt(dataNodeNum) + 1;
 			do {
-				datanode2 = new Random().nextInt(dataNodeNum);
+				datanode2 = r.nextInt(dataNodeNum) + 1;
 			} while(datanode2==datanode1);
 
 			System.out.println(datanode1 + " " + datanode2);
@@ -243,6 +244,7 @@ public class NameNode implements INameNode {
 			
 			Registry registry = LocateRegistry.getRegistry();
 			registry.bind("NameNode", stub);
+			report.createNewFile();
 		}
 		catch (Exception e)
 		{
