@@ -17,7 +17,7 @@ public class DataNode implements IDataNode {
 
 	private static String NameNode_IP = "54.174.209.93";
 	private int ID;
-	private static final int block_size = 33554432;
+	private static final int blockSize = 33554432;
 
 	public DataNode(int id)
 	{
@@ -27,26 +27,26 @@ public class DataNode implements IDataNode {
 	public byte[] readBlock(byte[] inp) throws RemoteException
 	{
 		File dir = new File("Blocks");
-		Hdfs.ReadBlockResponse.Builder rbr_builder = Hdfs.ReadBlockResponse.newBuilder().setStatus(1);
+		Hdfs.ReadBlockResponse.Builder readBlockResponse = Hdfs.ReadBlockResponse.newBuilder().setStatus(1);
 		try
 		{
-			int blk_num = Hdfs.ReadBlockRequest.parseFrom(inp).getBlockNumber();
-			File block = new File(dir, String.valueOf(blk_num));
-			FileInputStream fis = new FileInputStream(block);
-			byte[] blk = new byte[block_size];
+			int blockNumber = Hdfs.ReadBlockRequest.parseFrom(inp).getBlockNumber();
+			File block = new File(dir, String.valueOf(blockNumber));
+			FileInputStream fileInputStream = new FileInputStream(block);
+			byte[] blk = new byte[blockSize];
 			int bytes;
 
-			while((bytes = fis.read(blk)) != -1)
+			while((bytes = fileInputStream.read(blk)) != -1)
 			{
 				ByteString data = ByteString.copyFrom(blk);
-				rbr_builder.addData(data);
+				readBlockResponse.addData(data);
 			}
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		return rbr_builder.build().toByteArray();
+		return readBlockResponse.build().toByteArray();
 	}
 
 	public byte[] writeBlock(byte[] inp) throws RemoteException
@@ -56,36 +56,36 @@ public class DataNode implements IDataNode {
 			File dir = new File("Blocks");
 			Hdfs.WriteBlockRequest writeBlockRequest = Hdfs.WriteBlockRequest.parseFrom(inp);
 
-			int blockNum = writeBlockRequest.getBlockInfo().getBlockNumber();
-			File blockFile = new File(dir, String.valueOf(blockNum));
-			FileOutputStream fos = new FileOutputStream(blockFile);
+			int blockNumber = writeBlockRequest.getBlockInfo().getBlockNumber();
+			File blockFile = new File(dir, String.valueOf(blockNumber));
+			FileOutputStream fileOutputStream = new FileOutputStream(blockFile);
 
 			List<ByteString> dataString = writeBlockRequest.getDataList();
 			for(ByteString byteString : dataString)
-				fos.write(byteString.toByteArray());
+				fileOutputStream.write(byteString.toByteArray());
 
-			fos.close();
+			fileOutputStream.close();
 
 			File report = new File("BlockReport.txt");
-			FileWriter fw = new FileWriter(report.getName(), true);
+			FileWriter fileWriter = new FileWriter(report.getName(), true);
 
-			BufferedWriter bw = new BufferedWriter(fw);
+			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
-			bw.write(Integer.toString(blockNum));
-			bw.newLine();
-			bw.close();
+			bufferedWriter.write(Integer.toString(blockNumber));
+			bufferedWriter.newLine();
+			bufferedWriter.close();
 
 			if(writeBlockRequest.getReplicate() == true)
 			{
 				Registry DataNode_registry = LocateRegistry.getRegistry(writeBlockRequest.getBlockInfo().getLocations(1).getIp(),1099);
 				IDataNode dnStub=(IDataNode)DataNode_registry.lookup("DataNode");
 
-				Hdfs.WriteBlockRequest.Builder writeBlockRequestBuilder = Hdfs.WriteBlockRequest.newBuilder();	
+				Hdfs.WriteBlockRequest.Builder writeBlockReplicate = Hdfs.WriteBlockRequest.newBuilder();	
 				for(ByteString byteString : dataString)
-					writeBlockRequestBuilder.addData(byteString);
-				writeBlockRequestBuilder.setBlockInfo(writeBlockRequest.getBlockInfo());
-				writeBlockRequestBuilder.setReplicate(false);
-				byte[] writeBlockResponseBytes = dnStub.writeBlock(writeBlockRequestBuilder.build().toByteArray());
+					writeBlockReplicate.addData(byteString);
+				writeBlockReplicate.setBlockInfo(writeBlockRequest.getBlockInfo());
+				writeBlockReplicate.setReplicate(false);
+				byte[] writeBlockResponseBytes = dnStub.writeBlock(writeBlockReplicate.build().toByteArray());
 				System.err.println("Block Replicated");
 			}
 			return Hdfs.WriteBlockResponse.newBuilder().setStatus(1).build().toByteArray();
@@ -111,12 +111,14 @@ public class DataNode implements IDataNode {
 			{
 				while(true){
 					Hdfs.HeartBeatRequest.Builder heartBeatRequestBuilder = Hdfs.HeartBeatRequest.newBuilder().setId(this.ID);
+					
 					Registry registry = LocateRegistry.getRegistry(NameNode_IP, 1099);
 					INameNode stub = (INameNode) registry.lookup("NameNode");
+
 					byte[] response = stub.heartBeat(heartBeatRequestBuilder.build().toByteArray());
 
-					Hdfs.HeartBeatResponse res = Hdfs.HeartBeatResponse.parseFrom(response);
-					System.err.println("Heart Beat Response from NameNode " + String.valueOf(res.getStatus()));
+					Hdfs.HeartBeatResponse heartBeatResponse = Hdfs.HeartBeatResponse.parseFrom(response);
+					System.err.println("Heart Beat Response from NameNode " + String.valueOf(heartBeatResponse.getStatus()));
 					Thread.sleep(10000);
 				}
 			}
@@ -139,27 +141,27 @@ public class DataNode implements IDataNode {
 		{
 			while(true)
 			{
-				File blk_rpt = new File("BlockReport.txt");
+				File blkReport = new File("BlockReport.txt");
 				String data = "";
-				if (blk_rpt.exists() && blk_rpt.length()!=0)
+				if (blkReport.exists() && blkReport.length()!=0)
 				{
 					try{
-						BufferedReader br = new BufferedReader(new FileReader(blk_rpt));
-						String blk_num;
-						Hdfs.BlockReportRequest.Builder blk_rpt_req_builder = Hdfs.BlockReportRequest.newBuilder().setId(this.ID);
-						while((blk_num = br.readLine())!=null)
+						BufferedReader br = new BufferedReader(new FileReader(blkReport));
+						String blockNumber;
+						Hdfs.BlockReportRequest.Builder blockReportRequest = Hdfs.BlockReportRequest.newBuilder().setId(this.ID);
+						while((blockNumber = br.readLine())!=null)
 						{
-							blk_rpt_req_builder.addBlockNumbers(Integer.parseInt(blk_num));
+							blockReportRequest.addBlockNumbers(Integer.parseInt(blockNumber));
 						}
 						br.close();
 
 						Registry registry = LocateRegistry.getRegistry(NameNode_IP,1099);
 						INameNode stub = (INameNode) registry.lookup("NameNode");
-						byte[] blockReportResponse = stub.blockReport(blk_rpt_req_builder.build().toByteArray());
 
-						Hdfs.BlockReportResponse res = Hdfs.BlockReportResponse.parseFrom(blockReportResponse);
-						System.err.println("Block Report Response from NameNode " + String.valueOf(res.getStatusCount()));
-						Thread.sleep(10000);
+						byte[] response = stub.blockReport(blockReportRequest.build().toByteArray());
+
+						Hdfs.BlockReportResponse blockReportResponse = Hdfs.BlockReportResponse.parseFrom(response);
+						System.err.println("Block Report Response from NameNode " + String.valueOf(blockReportResponse.getStatusCount()));
 					}
 					catch (Exception e)
 					{
@@ -169,14 +171,14 @@ public class DataNode implements IDataNode {
 				else
 				{
 					System.err.println("No block report");
-					try
-					{
-						Thread.sleep(10000);
-					}
-					catch (Exception e)
-					{
-						e.printStackTrace();
-					}
+				}
+				try
+				{
+					Thread.sleep(10000);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
 				}
 			}
 		}
