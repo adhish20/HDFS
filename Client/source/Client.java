@@ -109,18 +109,18 @@ public class Client
 							Hdfs.AssignBlockResponse assignBlockResponse = Hdfs.AssignBlockResponse.parseFrom(assignBlockResponseBytes);
 							Hdfs.BlockLocations blockLocation = assignBlockResponse.getNewBlock();
 
-							for( Hdfs.DataNodeLocation dataNodeLocation : blockLocation.getLocationsList() )
-							{
-								Registry DataNode_registry = LocateRegistry.getRegistry(dataNodeLocation.getIp(),1099);
-								IDataNode dnStub=(IDataNode)DataNode_registry.lookup("DataNode");
+							Registry DataNode_registry = LocateRegistry.getRegistry(blockLocation.getLocations(0).getIp(),1099);
+							IDataNode dnStub=(IDataNode)DataNode_registry.lookup("DataNode");
 
-								Hdfs.WriteBlockRequest.Builder writeBlockRequestBuilder = Hdfs.WriteBlockRequest.newBuilder();
-								writeBlockRequestBuilder.addData(ByteString.copyFrom(readBytes));
-								writeBlockRequestBuilder.setBlockInfo(blockLocation);
-								byte[] writeBlockResponseBytes = dnStub.writeBlock(writeBlockRequestBuilder.build().toByteArray());
-								Hdfs.WriteBlockResponse writeBlockResponse = Hdfs.WriteBlockResponse.parseFrom(writeBlockResponseBytes);
-							}
+							Hdfs.WriteBlockRequest.Builder writeBlockRequestBuilder = Hdfs.WriteBlockRequest.newBuilder();
+							writeBlockRequestBuilder.addData(ByteString.copyFrom(readBytes));
+							writeBlockRequestBuilder.setBlockInfo(blockLocation);
+							writeBlockRequestBuilder.setReplicate(true);
+							byte[] writeBlockResponseBytes = dnStub.writeBlock(writeBlockRequestBuilder.build().toByteArray());
+							Hdfs.WriteBlockResponse writeBlockResponse = Hdfs.WriteBlockResponse.parseFrom(writeBlockResponseBytes);
+							System.err.println("Block Written");
 						}
+						System.err.println("File Written");
 						Hdfs.CloseFileRequest.Builder closeFileRequestBuilder = Hdfs.CloseFileRequest.newBuilder();
 						closeFileRequestBuilder.setHandle(openFileResponse.getHandle());
 						stub.closeFile(closeFileRequestBuilder.build().toByteArray());

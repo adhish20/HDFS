@@ -22,6 +22,7 @@ message CloseFileResponse {
 message WriteBlockRequest {
   optional BlockLocations blockInfo = 1;
   repeated bytes data = 2;
+  optional bool replicate = 3;
 }
 
 message WriteBlockResponse {

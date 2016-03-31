@@ -75,6 +75,19 @@ public class DataNode implements IDataNode {
 			bw.newLine();
 			bw.close();
 
+			if(writeBlockRequest.getReplicate() == true)
+			{
+				Registry DataNode_registry = LocateRegistry.getRegistry(writeBlockRequest.getBlockInfo().getLocations(1).getIp(),1099);
+				IDataNode dnStub=(IDataNode)DataNode_registry.lookup("DataNode");
+
+				Hdfs.WriteBlockRequest.Builder writeBlockRequestBuilder = Hdfs.WriteBlockRequest.newBuilder();	
+				for(ByteString byteString : dataString)
+					writeBlockRequestBuilder.addData(byteString);
+				writeBlockRequestBuilder.setBlockInfo(writeBlockRequest.getBlockInfo());
+				writeBlockRequestBuilder.setReplicate(false);
+				byte[] writeBlockResponseBytes = dnStub.writeBlock(writeBlockRequestBuilder.build().toByteArray());
+				System.err.println("Block Replicated");
+			}
 			return Hdfs.WriteBlockResponse.newBuilder().setStatus(1).build().toByteArray();
 		}
 		catch (Exception e)
