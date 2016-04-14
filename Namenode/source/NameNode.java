@@ -204,7 +204,7 @@ public class NameNode implements INameNode {
 				}
 			}
 
-			Hdfs.BlockReportResponse.Builder blockReportResponse = Hdfs.BlockReportResponse.newBuilder().setStatus(0,1);
+			Hdfs.BlockReportResponse.Builder blockReportResponse = Hdfs.BlockReportResponse.newBuilder().addStatus(1);
 			return blockReportResponse.build().toByteArray();
 		}
 		catch (Exception e)
