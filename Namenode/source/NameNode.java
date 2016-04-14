@@ -133,9 +133,9 @@ public class NameNode implements INameNode {
 
 			int DN1, DN2;
 			Random r = new Random();
-			DN1 = r.nextInt(dataNodeNum) + 1;
+			DN1 = r.nextInt(dataNodeNum);
 			do {
-				DN2 = r.nextInt(dataNodeNum) + 1;
+				DN2 = r.nextInt(dataNodeNum);
 			} while(DN2==DN1);
 
 			System.out.println(DN1 + " " + DN2);
